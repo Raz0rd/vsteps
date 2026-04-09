@@ -1,0 +1,46 @@
+version: "3.8"
+
+services:
+  mitmproxy:
+    image: mitmproxy/mitmproxy:latest
+    command: >
+      mitmdump -p 8888
+      --mode upstream:134.119.184.115:9000
+      --upstream-auth geonode_6Ql9LDe3me-country-br:e7c71265-a464-43d2-a5f3-d6ea91fe1d0b
+      --set stream_large_bodies=0
+      --ssl-insecure
+    ports:
+      - "8888:8888"
+    volumes:
+      - mitmproxy-certs:/home/mitmproxy/.mitmproxy
+    restart: unless-stopped
+
+  vivo-easy:
+    build: .
+    ports:
+      - "5050:5050"
+    depends_on:
+      - mitmproxy
+    volumes:
+      - ./data:/app/data
+      - ./data/sync_id_easy.txt:/app/sync_id_easy.txt:ro
+      - mitmproxy-certs:/mitmproxy-certs:ro
+    environment:
+      - PYTHONUNBUFFERED=1
+      - REQUESTS_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - SSL_CERT_FILE=/etc/ssl/certs/ca-certificates.crt
+      - CURL_CA_BUNDLE=/etc/ssl/certs/ca-certificates.crt
+      - WORKER_THREADS=5
+      - MAX_USOS_CARTAO=3
+      - ADMIN_PASSWORD=admin2026xz
+      - CLIENT_PASSWORD=vivo2026
+      - RECOVERY_PASS=senhaeasy
+      - TWOCAPTCHA_KEY=3c27e307650071e5a47516cafa2becb1
+      - USE_PROXY=true
+      - PROXY_URL=http://mitmproxy:8888
+      - DASHBOARD_PORT=5050
+      - MODE=all
+    restart: unless-stopped
+
+volumes:
+  mitmproxy-certs:

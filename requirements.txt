@@ -1,0 +1,4 @@
+flask==3.1.0
+requests==2.32.3
+httpx==0.28.1
+urllib3==2.3.0
